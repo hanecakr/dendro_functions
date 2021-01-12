@@ -23,8 +23,8 @@ Computes correlations between two sets of tree-ring series (class 'rwl', see `dp
 
 Output values:
 
-     - overlap: n° of shared years between two series
-     - glk: the *Gleichlaüfigkeit* or percentage of parallel variation (%PV)
-     - tBP: t-values according to the Baillie-Pilcher algorithm
-     - tHo: t-values accoriding to the Hollstein 1980 algorithm
-     - r_pearson:  Pearson correlation between two series
+- overlap: n° of shared years between two series
+- glk: the *Gleichlaüfigkeit* or percentage of parallel variation (%PV)
+- tBP: t-values according to the Baillie-Pilcher algorithm
+- tHo: t-values accoriding to the Hollstein 1980 algorithm
+- r_pearson:  Pearson correlation between two series
