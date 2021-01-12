@@ -1,0 +1,13 @@
+---
+output: 
+  github_document:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# dendro_functions
+
+A set of functions for tree-ring analysis.
