@@ -17,6 +17,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 A set of functions for tree-ring analysis.
 
+
+The [:file\_folder: R](/R) directory contains the R-script for each function.
+
 ## `CorrTable`
 
 Computes correlations between two sets of tree-ring series (class 'rwl', see `dplR`). When only one set of trs is provided, internal correlations are computed.
