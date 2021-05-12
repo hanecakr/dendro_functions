@@ -22,12 +22,17 @@ The [:file\_folder: R](/R) directory contains the R-script for each function.
 
 ## `CorrTable`
 
-Computes correlations between two sets of tree-ring series (class 'rwl', see `dplR`). When only one set of trs is provided, internal correlations are computed.
+Computes correlations between a set of tree-ring series (class 'rwl', see `dplR`: https://github.com/AndyBunn/dplR) and dated reference chronologies (class 'rwl', see `dplR`: https://github.com/AndyBunn/dplR).
 
-Output values:
+When only one set of tree-ring series is provided, internal correlations are computed.
+
+
+**Output values:**
 
 - overlap: n° of shared years between two series
 - glk: the *Gleichlaüfigkeit* or percentage of parallel variation (%PV)
-- tBP: t-values according to the Baillie-Pilcher algorithm
-- tHo: t-values accoriding to the Hollstein 1980 algorithm
+- glk_p: the probability of exceedence for the *Gleichläufigkeit* value
+- tBP: *t*-values according to the Baillie-Pilcher algorithm
+- tHo: *t*-values accoriding to the Hollstein 1980 algorithm
 - r_pearson:  Pearson correlation between two series
+- t_St: Student's *t*-value of the Pearson correlation
