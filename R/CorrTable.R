@@ -3,13 +3,11 @@ CorrTable <-
                  y = NULL,
                  min_overlap = 30,
                  remove.duplicates = TRUE,
-                 output = "table",
-                 #c("matrix", "table")
+                 output = "table",#c("matrix", "table")
                  values = c("r_pearson", "t_St", "glk", "glk_p", "tBP", "tHo"),
-                 sort_by = "tHo")
-                #c("glk", "t_St", "tBP", "tHo", "r_pearson"))
+                 sort_by = "tHo") #c("glk", "t_St", "tBP", "tHo", "r_pearson"))
         {
-        ### check for and load required packages "dplR" and "dplyr"
+                ### check for and load required packages "dplR" and "dplyr"
                 
                 required_packages <-
                         c("dplR", "dplyr", "tidyr", "magrittr", "tibble")
@@ -29,25 +27,34 @@ CorrTable <-
                         }
                 }
                 
-        ### checks (-- from citation("dplR") --)
+                ### checks (-- from citation("dplR") --)
+                x_ori <- x
+                
                 if (is.null(y)) {
                         y = x
                         noRef = TRUE
                 }
                 else {
                         noRef = FALSE
+                        y_ori <- y
+                        
                 }
+                
                 if (!("rwl" %in% class(x))) {
                         warning("'x' is not class rwl")
                 }
+                if (!("rwl" %in% class(y))) {
+                        warning("'x' is not class rwl")
+                }
+                
                 if (!all(diff(as.numeric(row.names(x))) == 1)) {
                         stop(
-                             "The tree-ring series 'x' have/has no consecutive years in increasing order as rownames"
+                                "The tree-ring series 'x' have/has no consecutive years in increasing order as rownames"
                         )
                 }
                 if (!all(diff(as.numeric(row.names(y))) == 1)) {
                         stop(
-                             "The master series 'y' have/has no consecutive years in increasing order as rownames"
+                                "The master series 'y' have/has no consecutive years in increasing order as rownames"
                         )
                 }
                 if (any(
@@ -77,7 +84,7 @@ CorrTable <-
                         
                 }
                 
-        ### reduce x and y to common overlap, based on rownames = years
+                ### reduce x and y to common overlap, based on rownames = years
                 interval_x <- rownames(x)
                 interval_y <- rownames(y)
                 interval <- intersect(interval_x, interval_y)
@@ -88,7 +95,7 @@ CorrTable <-
                         stop("no common interval between series and refs")
                 }
                 
-        ### overlap
+                ### overlap
                 n <- dim(x)[2]
                 m <- dim(y)[2]
                 overlap <- matrix(NA_real_, nrow = n, ncol = m)
@@ -96,21 +103,20 @@ CorrTable <-
                 colnames(overlap) <- names(y)
                 
                 for (i in 1:n) {
-                # substract single column from each matrix column => NA when no overlap!
+                        # substract single column from each matrix column => NA when no overlap!
                         OVL <- x[, i] - y
                         OVL <- colSums(!is.na(OVL))
                         OVL[OVL == 0] <- NA
-                        # OVL[OVL<overlap] <- NA
                         overlap[i, ] <- OVL
                 }
                 
-                overlap_i <- overlap
-                overlap_i[overlap_i < min_overlap] <- NA
+                overlap[overlap < min_overlap] <- NA
                 
-        ### parallel variation (%PV | GLK)
+                ### parallel variation (%PV | GLK)
                 GLK_mat <- matrix(NA_real_, nrow = n, ncol = m)
                 rownames(GLK_mat) <- names(x)
                 colnames(GLK_mat) <- names(y)
+                
                 GLK_p <- matrix(NA_real_, nrow = n, ncol = m)
                 rownames(GLK_mat) <- names(x)
                 colnames(GLK_mat) <- names(y)
@@ -121,42 +127,35 @@ CorrTable <-
                         treering_sign_y <- apply(y, 2, diff)
                         treering_sign_y <- sign(treering_sign_y)
                         for (i in 1:n) {
-                        # substract single column from each matrix column => NA when no overlap!
                                 treering_GC <-
                                         abs(treering_sign_x[, i] - treering_sign_y)
                                 GLK_values <-
-                                        1 - (colSums(treering_GC, na.rm = TRUE) / (2 * (overlap_i[i, ] -
-                                                                                                1)))
+                                        1 - (colSums(treering_GC, na.rm = TRUE) / (2 * (overlap[i, ] - 1)))
                                 GLK_mat[i,] <- GLK_values
                         }
                         
                         if (noRef == TRUE) {
                                 diag(GLK_mat) <- 1
                         }
-        ### probability associated with %PV | GLK
-                        s_df <- 1 / (2 * sqrt(overlap_i))
+                        ### probability associated with %PV | GLK
+                        s_df <- 1 / (2 * sqrt(overlap))
                         z_df <- (GLK_mat - .5) / s_df
                         z_normcdf <-
-                                apply(z_df, 2, function(z)
-                                        pnorm(z, mean = 0, sd = 1))
+                                apply(z_df, 2, function(z) pnorm(z, mean = 0, sd = 1))
                         GLK_p <- 2 * (1 - z_normcdf)
                         
                 }
                 
-        ### t-values according to the Hollstein 1980 algorithm
+                ### t-values according to the Hollstein 1980 algorithm
                 tHo_mat <- matrix(NA_real_, nrow = n, ncol = m)
                 rownames(tHo_mat) <- names(x)
                 colnames(tHo_mat) <- names(y)
                 
                 if ("tHo" %in% values) {
-                        wuch_x <- apply(x, 2, function(x) {
-                                x / lag(x)
-                        })
+                        wuch_x <- apply(x, 2, function(x) {x / lag(x)})
                         wuch_x <- 100 * log10(wuch_x)
                         if (noRef == FALSE) {
-                                wuch_y <- apply(y, 2, function(x) {
-                                        x / lag(x)
-                                })
+                                wuch_y <- apply(y, 2, function(x) { x / lag(x) })
                                 wuch_y <- 100 * log10(wuch_y)
                                 r <-
                                         cor(wuch_x,
@@ -174,12 +173,12 @@ CorrTable <-
                         # if r <0, r is set to zero
                         r[r < 0] <- 0
                         tHo_mat <-
-                                round(r * sqrt(overlap_i - 2) / sqrt(1 - r ^ 2), 2)
+                                round(r * sqrt(overlap - 2) / sqrt(1 - r ^ 2), 2)
                         
                 }
                 
                 
-        ### t-values according to the Baillie-Pilcher 1973 algorithm
+                ### t-values according to the Baillie-Pilcher 1973 algorithm
                 
                 tBP_mat <- matrix(NA_real_, nrow = n, ncol = m)
                 rownames(tBP_mat) <- names(x)
@@ -216,32 +215,31 @@ CorrTable <-
                         # if r <0, r is set to zero
                         r[r < 0] <- 0
                         tBP_mat <-
-                                round(r * sqrt(overlap_i - 2) / sqrt(1 - r ^ 2), 2)
+                                round(r * sqrt(overlap - 2) / sqrt(1 - r ^ 2), 2)
                         
                 }
                 
-        ### r-Pearson
+                ### r-Pearson
                 r_pearson <- matrix(NA_real_, nrow = n, ncol = m)
                 
                 if ("r_pearson" %in% values | "t_St" %in% values) {
                         r_pearson <-
                                 cor(x, y, method = "pearson", use = "pairwise.complete.obs")
-                        overlap_r <- is.na(overlap_i)
-                        overlap_r <-
-                                ifelse(overlap_r == TRUE, NA, 1)
+                        overlap_r <- is.na(overlap)
+                        overlap_r <- ifelse(overlap_r == TRUE, NA, 1)
                         r_pearson <- r_pearson * overlap_r
                         
                 }
                 
-        ### t-value (Student's t)
+                ### t-value (Student's t)
                 t_St <- matrix(NA_real_, nrow = n, ncol = m)
                 
                 if ("t_St" %in% values) {
-                        t_St <- (r_pearson * sqrt(n - 2)) / sqrt(1 - r_pearson ^ 2)
+                        t_St <- (r_pearson * sqrt(overlap - 2)) / sqrt(1 - r_pearson ^ 2)
                         
                 }
                 
-        ### output
+                ### output
                 corr_table <-
                         list(
                                 overlap = overlap,
@@ -254,14 +252,31 @@ CorrTable <-
                         )
                 
                 if (output == "table") {
-                        descr <- dplR::rwl.stats(x) %>%
-                                select(series, first, last, year)
+                        
+                        yr.range <- function(x, yr.vec = as.numeric(names(x))) {
+                                na.flag <- is.na(x)
+                                if (all(na.flag)) {
+                                        res <- rep(NA, 2)
+                                        mode(res) <- mode(yr.vec)
+                                        res
+                                } else {
+                                        range(yr.vec[!na.flag])
+                                }
+                        }
+                        
+                        descr <- t(apply(x_ori, 2, FUN = function(z) {yr.range(z)}))
                         
                         if (noRef == FALSE) {
-                                descr_y <- dplR::rwl.stats(y) %>%
-                                        select(series, first, last, year)
-                                descr <- rbind(descr, descr_y)
+                                descr_y <- apply(y_ori, 2, FUN = function(z) {yr.range(z)})
+                                descr <- rbind(descr, t(descr_y))
                         }
+                        
+                        colnames(descr) <- c("first", "last")
+                        descr <- descr %>% 
+                                data.frame() %>%
+                                mutate(length = last - first + 1) %>% 
+                                rownames_to_column(var = "series") %>% 
+                                unique()
                         
                         for (i in names(corr_table)) {
                                 if (i == names(corr_table)[1]) {
@@ -291,17 +306,19 @@ CorrTable <-
                         }
                         corr_table <-
                                 corr_table_i %>%
-                                dplyr::left_join(descr %>% select(-year),
+                                dplyr::left_join(descr %>% select(-length),
                                                  by = c("reference" = "series")) %>%
                                 rename(ref_end = last,
                                        ref_start = first) %>%
-                                dplyr::left_join(descr %>% select(-first), by = "series") %>%
-                                rename(series_length = year,
+                                dplyr::left_join(descr,
+                                                 by = "series") %>%
+                                rename(series_start = first,
                                        series_end = last)
                         
                         col_order <- c(
                                 "series",
-                                "series_length",
+                                "length",
+                                "series_start",
                                 "series_end",
                                 "reference",
                                 "ref_start",
@@ -337,17 +354,17 @@ CorrTable <-
                                                 "t_St"
                                         ),
                                         values)
+                                
                                 corr_table <-
                                         select(corr_table, vars = -cols_to_remove)
                         }
                         
-                ### remove duplicates
-                        if (remove.duplicates == TRUE &&
-                            noRef == TRUE) {
+                        ### remove duplicates (not possible when y != NULL)
+                        if (remove.duplicates == TRUE && noRef == TRUE) {
                                 corr_table <- subset(corr_table, series < reference)
                         }
                         
-                ### sort by series, then by tHo (or sort_by argument)
+                        ### sort by series, then by tHo (or sort_by argument)
                         sort_by <- c("series", sort_by)
                         corr_table <-
                                 corr_table %>%
