@@ -20,7 +20,9 @@ A set of functions for tree-ring analysis.
 
 The [:file\_folder: R](/R) directory contains the R-script for each function.
 
-## `CorrTable`
+## `corrTable`
+
+!! _Test version. Currently under development_ !!
 
 Computes correlations between a set of tree-ring series `x` (class 'rwl', see `dplR`: https://github.com/AndyBunn/dplR) and dated reference chronologies `y`.
 
@@ -28,21 +30,32 @@ When only one set of tree-ring series is provided, internal correlations are com
 
 ```{r eval=F}
 
-CorrTable(x,
+corrTable(x,
           y = NULL,
           min_overlap = 30,
           remove.duplicates = TRUE,
-          output = "table", #c("matrix", "table") a list of matrices for each correlation variable, or a single table as output
-          values = c("r_pearson", "t_St", "glk", "glk_p", "tBP", "tHo"), # for selecting a reduced set of correlation variables
-          sort_by = "tHo") #c("glk", "t_St", "tBP", "tHo", "r_pearson")) sorting variable when "table" is chosen as output
+          output = "table",
+          values = c("r_pearson", "t_St", "glk", "glk_p", "tBP", "tHo"), 
+          sort_by = "tHo")
 
 ```
 
+**Function parameters:**
+
+- x: tree-ring data as data.frame of class 'rwl'
+- y: tree-ring data (or reference chronologies) as data.frame of class 'rwl
+- min_overlap: numeric, minimum overlap of series and chronologies
+- remove.duplicates: logical, if TRUE duplicate comparisons between pairs of series/chronologies are removed
+- output: should be one of c("matrix", "table")
+- values: which correlation values should be computed: c("r_pearson", "t_St", "glk", "glk_p", "tBP", "tHo")
+- sort_by: correlation value to sort resulting table by
+
+
 **Output values:**
 
-- overlap: n¬∞ of shared years between two series
-- glk: the *Gleichla√ºfigkeit* or percentage of parallel variation (%PV)
-- glk_p: the probability of exceedence for the *Gleichl√§ufigkeit* value
+- overlap: n∞ of shared years between two series
+- glk: the *Gleichl‰ufigkeit* or percentage of parallel variation (%PV)
+- glk_p: the probability of exceedence for the *Gleichl‰ufigkeit* value
 - tBP: *t*-values according to the Baillie-Pilcher (1973) algorithm
 - tHo: *t*-values according to the Hollstein (1980) algorithm
 - r_pearson:  Pearson correlation between two series
