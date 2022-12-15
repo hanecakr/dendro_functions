@@ -104,14 +104,17 @@ corrTable <-
           overlap_i[overlap_i < min_overlap] <- NA
           
           ### parallel variation (%PV | GLK)
-          GLK_mat <- matrix(NA_real_, nrow = n, ncol = m)
-          rownames(GLK_mat) <- names(x)
-          colnames(GLK_mat) <- names(y)
-          GLK_p <- matrix(NA_real_, nrow = n, ncol = m)
-          rownames(GLK_mat) <- names(x)
-          colnames(GLK_mat) <- names(y)
+          GLK_mat <- NULL
+          GLK_p <- NULL
           
           if ("glk" %in%  values) {
+               
+               GLK_mat <- matrix(NA_real_, nrow = n, ncol = m)
+               rownames(GLK_mat) <- names(x)
+               colnames(GLK_mat) <- names(y)
+               GLK_p <- matrix(NA_real_, nrow = n, ncol = m)
+               rownames(GLK_mat) <- names(x)
+               colnames(GLK_mat) <- names(y)
                
                treering_sign_x <- apply(x, 2, diff)
                treering_sign_x <- sign(treering_sign_x)
@@ -136,14 +139,18 @@ corrTable <-
                          pnorm(z, mean = 0, sd = 1))
                GLK_p <- 2 * (1 - z_normcdf)
                
+               GLK_mat <- round(100 * GLK_mat, 1)
+
           }
           
           ### compute t-values according to the Hollstein 1980 algorithm
-          tHo_mat <- matrix(NA_real_, nrow = n, ncol = m)
-          rownames(tHo_mat) <- names(x)
-          colnames(tHo_mat) <- names(y)
+          tHo_mat <- NULL
           
           if ("tHo" %in% values) {
+               
+               tHo_mat <- matrix(NA_real_, nrow = n, ncol = m)
+               rownames(tHo_mat) <- names(x)
+               colnames(tHo_mat) <- names(y)               
                
                wuch_x <- apply(x, 2, function(x) {x/lag(x)})
                wuch_x <- 100*log10(wuch_x)
@@ -164,11 +171,13 @@ corrTable <-
           
           ### compute t-values according to the Baillie-Pilcher 1973 algorithm
           
-          tBP_mat <- matrix(NA_real_, nrow = n, ncol = m)
-          rownames(tBP_mat) <- names(x)
-          colnames(tBP_mat) <- names(y)
+          tBP_mat <- NULL
           
           if ("tBP" %in% values) {
+               
+               tBP_mat <- matrix(NA_real_, nrow = n, ncol = m)
+               rownames(tBP_mat) <- names(x)
+               colnames(tBP_mat) <- names(y)
                
                movav5_x <- apply(x, 2, function(x) {MovAv(x, w = 5)})
                rownames(movav5_x) <- rownames(x)
@@ -192,9 +201,11 @@ corrTable <-
           }
           
           ### r-Pearson
-          r_pearson <- matrix(NA_real_, nrow = n, ncol = m)
+          r_pearson <- NULL
           
           if ("r_pearson" %in% values | "t_St" %in% values) {
+               
+               r_pearson <- matrix(NA_real_, nrow = n, ncol = m)
                
                r_pearson <- cor(x, y, method = "pearson", use = "pairwise.complete.obs")
                overlap_r <- is.na(overlap_i)
@@ -207,14 +218,14 @@ corrTable <-
           t_St <- matrix(NA_real_, nrow = n, ncol = m)
           
           if ("t_St" %in% values) {
-               t_St <- (r_pearson * sqrt(n - 2)) / sqrt(1 - r_pearson^2)
+               t_St <- (r_pearson * sqrt(overlap_i - 2)) / sqrt(1 - r_pearson^2)
                
           }
           
           ### output
           corr_table <-
                list(overlap = overlap,
-                    glk = round(100 * GLK_mat, 1),
+                    glk = GLK_mat,
                     glk_p = GLK_p,
                     r_pearson = r_pearson,
                     t_St = t_St,
